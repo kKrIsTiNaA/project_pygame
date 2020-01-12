@@ -1,9 +1,10 @@
-import pygame
 import os
 import sys
 
+import pygame
+
 pygame.init()
-size = w, h = 550, 550
+size = w, h = 800, 600
 screen = pygame.display.set_mode(size)
 
 
@@ -25,21 +26,25 @@ def terminate():
 
 
 def start_screen():
-    image = load_image('fon.jpg')
-    image = pygame.transform.scale(image, (550, 550))
+    image = load_image('fon.png')
+    image = pygame.transform.scale(image, (800, 600))
     screen.blit(image, (0, 0))
-    intro_text = ['ЗАСТАВКА', '',
-                  'Правила игры',
-                  'Если в правилах несколько строк',
-                  'приходится выводить их отдельно']
-    font = pygame.font.Font(None, 30)
-    text_coords = 50
-    for line in intro_text:
-        string_rend = font.render(line, 1, (0, 0, 0))
+    intro_text = 'THE LORD OF HELL'
+    font = pygame.font.Font('data/17440.otf', 60)
+    string_rend = font.render(intro_text, 1, (0, 0, 0))
+    intro_rect = string_rend.get_rect()
+    intro_rect.top = 100
+    intro_rect.x = 130
+    screen.blit(string_rend, intro_rect)
+    font2 = pygame.font.Font('data/18642.ttf', 42)
+    text = ['НАЧАТЬ', 'ПРАВИЛА ИГРЫ', 'ВЫХОД']
+    text_coords = 190
+    for line in text:
+        string_rend = font2.render(line, 1, (0, 0, 0))
         intro_rect = string_rend.get_rect()
-        text_coords += 10
+        text_coords += 50
         intro_rect.top = text_coords
-        intro_rect.x = 10
+        intro_rect.x = 130
         text_coords += intro_rect.height
         screen.blit(string_rend, intro_rect)
 
@@ -56,8 +61,8 @@ def load_level(filename):
     filename = 'data/' + filename
     with  open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
-    max_width = max(map(len, level_map))
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+        max_width = max(map(len, level_map))
+        return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
 def level_generate(level):
@@ -99,6 +104,29 @@ class Shell(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.rect.move(self.direction[0], self.direction[1])
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
 
 
 shells = {'fireball': pygame.transform.scale(load_image('fireball.png', (0, 0, 0)), (80, 50))}
