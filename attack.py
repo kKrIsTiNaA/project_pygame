@@ -6,6 +6,7 @@ import pygame
 pygame.init()
 size = w, h = 800, 600
 screen = pygame.display.set_mode(size)
+pygame.mouse.set_visible(False)
 
 
 def load_image(name, colorkey=None):
@@ -23,6 +24,50 @@ def load_image(name, colorkey=None):
 def terminate():
     pygame.quit()
     sys.exit()
+
+
+def show_rules():
+    screen2 = pygame.display.set_mode(size)
+    image2 = load_image('mountains.png')
+    screen2.blit(image2, (0, 0))
+    text2 = ["ПРАВИЛА", " ", "Ваш персонаж - волшебник, задача которого -",
+             "уничтожить помощника Сатаны, который причиняет",
+             "вред мирным жителям. Вам нужно пройти пройти",
+             "2 уровня, а потом сразиться с главным злодеем.",
+             "Подсказка: вам необходимо убить всех монстров на",
+             "каждом уровне. Для передвижения используйте",
+             "клавиши-стрелки, а для атаки - левую кнопку мыши.",
+             "Подбирать предметы можно при помощи клавиши", "Enter. Удачи!",
+             "Чтобы вернуться назад, нажмите Esc"]
+    font3 = pygame.font.Font('data/18642.ttf', 32)
+    text_coord = 30
+    for line in text2:
+        if ('Для передвижения' in line or 'атаки -' in line or
+                'при помощи клавиши' in line or 'Удачи' in line or
+                'Подсказка' in line):
+            string_rendered = font3.render(line, 1, pygame.Color('white'))
+        elif "Esc" in line:
+            string_rendered = font3.render(line, 1, pygame.Color('yellow'))
+        else:
+            string_rendered = font3.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 20
+        text_coord += intro_rect.height
+        if 'Esc' in line:
+            intro_rect.top = 10
+            intro_rect.x = 240
+        screen.blit(string_rendered, intro_rect)
+    running2 = True
+    pygame.display.flip()
+    while running2:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
 
 
 def start_screen():
@@ -47,19 +92,72 @@ def start_screen():
         intro_rect.x = 130
         text_coords += intro_rect.height
         screen.blit(string_rend, intro_rect)
+    cursor = Cursor()
+    all_sprites.add(cursor)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                return
+            elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        cursor.move_up()
+                    elif event.key == pygame.K_DOWN:
+                        cursor.move_down()
+                    elif event.key == pygame.K_RETURN:
+                        if cursor.rect.y == 245:
+                            cursor.kill()
+                            return
+                        elif cursor.rect.y == 345:
+                            show_rules()
+                        else:
+                            terminate()
+        screen.blit(image, (0, 0))
+        string_rend = font.render(intro_text, 1, (0, 0, 0))
+        intro_rect = string_rend.get_rect()
+        intro_rect.top = 100
+        intro_rect.x = 130
+        screen.blit(string_rend, intro_rect)
+        font2 = pygame.font.Font('data/18642.ttf', 42)
+        text = ['НАЧАТЬ', 'ПРАВИЛА ИГРЫ', 'ВЫХОД']
+        text_coords = 190
+        for line in text:
+            if (cursor.rect.y == 245 and line == 'НАЧАТЬ' or
+                    cursor.rect.y == 345 and line == 'ПРАВИЛА ИГРЫ' or
+                    cursor.rect.y == 445 and line == 'ВЫХОД'):
+                string_rend = font2.render(line, 1, (255, 255, 40))
+            else:
+                string_rend = font2.render(line, 1, (0, 0, 0))
+            intro_rect = string_rend.get_rect()
+            text_coords += 50
+            intro_rect.top = text_coords
+            intro_rect.x = 130
+            text_coords += intro_rect.height
+            screen.blit(string_rend, intro_rect)
+        all_sprites.draw(screen)
         pygame.display.flip()
+
+
+class Cursor(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = load_image('sword.png', -1)
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = 65, 245
+
+    def move_up(self):
+        if self.rect.y != 245:
+            self.rect.y -= 100
+
+    def move_down(self):
+        if self.rect.y != 445:
+            self.rect.y += 100
 
 
 def load_level(filename):
     filename = 'data/' + filename
-    with  open(filename, 'r') as mapFile:
+    with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
         max_width = max(map(len, level_map))
         return list(map(lambda x: x.ljust(max_width, '.'), level_map))
@@ -129,6 +227,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
+all_sprites = pygame.sprite.Group()
 shells = {'fireball': pygame.transform.scale(load_image('fireball.png', (0, 0, 0)), (80, 50))}
 player_image = load_image('wizard.png')
 player_image = pygame.transform.scale(player_image, (80, 50))
@@ -136,7 +235,6 @@ tile_width = tile_height = 50
 player = None
 start_screen()
 clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 player, level_x, level_y = level_generate(load_level('level1.txt'))
 running = True
