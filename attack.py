@@ -168,7 +168,13 @@ def level_generate(level):
     for y in range(len(level)):
         for x in range(len(level)):
             if level[y][x] == '@':
+                Tile(tile_images['s'], x, y)
                 x1, y1 = x, y
+            elif level[y][x] != 'm':
+                Tile(tile_images[level[y][x]], x, y)
+            else:
+                Tile(tile_images['s'], x, y)
+                # отрисовка монстра
     new_player = Character(x1, y1)
     return new_player, x, y
 
@@ -189,6 +195,13 @@ class Character(pygame.sprite.Sprite):
 
     def attack(self, direction):
         shell = Shell(self.x, self.y, 'fireball', direction)
+
+
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, tile_image, pos_x, pos_y):
+        super().__init__(tiles_group, all_sprites)
+        self.image = tile_image
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
 
 class Shell(pygame.sprite.Sprite):
@@ -227,9 +240,43 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
+class Camera:
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - w // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - h // 2)
+
+
 all_sprites = pygame.sprite.Group()
 shells = {'fireball': pygame.transform.scale(load_image('fireball.png', (0, 0, 0)), (80, 50))}
-player_image = load_image('wizard.png')
+tiles_group = pygame.sprite.Group()
+tile_images = {'n': load_image('lb.png'), 'l': load_image('ln.png'),
+               'r': load_image('stone2.png'), 's': load_image('sand2.png'),
+               'f': load_image('flower12.png'), 't': load_image('pl2.png'),
+               'w': load_image('water2.png'), 'v': load_image('pine_t2.png'),
+               'j': load_image('pine_b2.png'), 'g': load_image('mushroom2.png'),
+               'k': load_image('key2.png'), 'x': load_image('fish_water.png'),
+               '+': load_image('bochka2.png'), 'b': load_image('timber2.png'),
+               "'": load_image('left_bird2.png'),
+               '"': load_image('right_bird2.png'), 'u': load_image('kust2.png'),
+               'y': load_image('sv.png'), 'i': load_image('sn.png'),
+               'o': load_image('kolodets2.png'), 'a': load_image('what2.png'),
+               'z': load_image('fl22.png'), '1': load_image('h1_2.png'),
+               '2': load_image('h2_2.png'), '3': load_image('h3_2.png'),
+               '4': load_image('h4_2.png'), '5': load_image('h5.png'),
+               '6': load_image('h6_2.png'), '7': load_image('h7_2.png'),
+               '8': load_image('h8.png'), '9': load_image('h9_2.png'),
+               '0': load_image('h10_2.png'), '#': load_image('h11_2.png'),
+               '%': load_image('h12_2.png'), '*': load_image('h13_2.png'),
+               '?': load_image('h14_2.png'), 'p': load_image('fish_water2.png')}
+player_image = load_image('wizard.png', -1)
 player_image = pygame.transform.scale(player_image, (80, 50))
 tile_width = tile_height = 50
 player = None
@@ -237,6 +284,10 @@ start_screen()
 clock = pygame.time.Clock()
 player_group = pygame.sprite.Group()
 player, level_x, level_y = level_generate(load_level('level1.txt'))
+camera = Camera()
+camera.update(player)
+for sprite in all_sprites:
+    camera.apply(sprite)
 running = True
 while running:
     for event in pygame.event.get():
