@@ -228,7 +228,7 @@ class Nps(pygame.sprite.Sprite):
         self.x = pos_x
         self.y = pos_y
         self.fl = True
-        self.image = (load_image('Download60481.png').subsurface(pygame.Rect((0, 135), (74, 70))))
+        self.image = (load_image('Download60481.png', -1).subsurface(pygame.Rect((0, 135), (74, 70))))
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def update(self, flag=None):
@@ -303,7 +303,7 @@ class Camera:
 
 all_sprites = pygame.sprite.Group()
 shells = {'fireball': pygame.transform.scale(load_image('fireball.png', (0, 0, 0)), (50, 30))}
-player_image = (load_image('Download57453.png').subsurface(pygame.Rect((0, 135), (74, 70))))
+player_image = (load_image('Download57453.png', -1).subsurface(pygame.Rect((0, 135), (74, 70))))
 tiles_group = pygame.sprite.Group()
 tile_images = {'n': load_image('lb.png'), 'l': load_image('ln.png'),
                'r': load_image('stone2.png'), 's': load_image('sand2.png'),
