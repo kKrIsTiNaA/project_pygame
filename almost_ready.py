@@ -27,23 +27,6 @@ def terminate():
     sys.exit()
 
 
-def wave(x, y, cur, n, m, lab):
-    lab[x][y] = cur
-    if y + 1 < m:
-        if lab[x][y + 1] == 0 or (lab[x][y + 1] != -1 and lab[x][y + 1] > cur):
-            wave(x, y + 1, cur + 1, n, m, lab)
-    if x + 1 < n:
-        if lab[x + 1][y] == 0 or (lab[x + 1][y] != -1 and lab[x + 1][y] > cur):
-            wave(x + 1, y, cur + 1, n, m, lab)
-    if x - 1 >= 0:
-        if lab[x - 1][y] == 0 or (lab[x - 1][y] != -1 and lab[x - 1][y] > cur):
-            wave(x - 1, y, cur + 1, n, m, lab)
-    if y - 1 >= 0:
-        if lab[x][y - 1] == 0 or (lab[x][y - 1] != -1 and lab[x][y - 1] > cur):
-            wave(x, y - 1, cur + 1, n, m, lab)
-    return lab
-
-
 def load_level(filename):
     filename = 'data/' + filename
     with open(filename, 'r') as mapFile:
@@ -133,19 +116,18 @@ class Nps(pygame.sprite.Sprite):
             self.fl = False
         if flag:
             self.fl = True
-        if (self.rect.x - player.rect.x) // tile_width <= 8 and (
-                self.rect.y - player.rect.y) // tile_height <= 8:
-            lab = wave(self.rect.y // tile_height, self.rect.x // tile_width, 1, level_x, level_y,
-                       level)
-            x, y = player.rect.x // tile_width, player.y // tile_height
-            self.get_way(y, x, level_x, level_y, lab, lab[x][y])
-            for i in self.way:
-                if (self.rect.x - player.rect.x) // tile_width == len(self.way) - 1 or (
-                        self.rect.y - player.rect.y) // tile_height == len(self.way) - 1:
-                    self.attack((-1, 0))
-                else:
-                    self.rect.x += i[0] * tile_width
-                    self.rect.y += i[1] * tile_height
+        lab = wave(self.rect.y // tile_height, self.rect.x // tile_width, 1, level_x, level_y,
+                   level)
+        x, y = player.rect.x // tile_width, player.y // tile_height
+        self.get_way(y, x, level_x, level_y, lab, lab[x][y])
+        print(self.way)
+        for i in self.way:
+            if (self.rect.x - player.rect.x) // tile_width == len(self.way) - 1 or (
+                    self.rect.y - player.rect.y) // tile_height == len(self.way) - 1:
+                self.attack((-1, 0))
+            else:
+                self.rect.x += i[0] * tile_width
+                self.rect.y += i[1] * tile_height
 
 
     def attack(self, direction):
