@@ -7,7 +7,7 @@ CAN_ATTACK = 10
 MOVE = 10
 
 pygame.init()
-size = w, h = 900, 900
+size = w, h = 800, 800
 screen = pygame.display.set_mode(size)
 pygame.time.set_timer(CAN_ATTACK, 2000)
 pygame.time.set_timer(MOVE, 5000)
@@ -114,6 +114,14 @@ class Character(pygame.sprite.Sprite):
         self.animation.update()
         self.image = self.animation.image
         if self.move != (0, 0):
+            if self.move == (8, 0):
+                self.animation = animations['right']
+            elif self.move == (-8, 0):
+                self.animation = animations['left']
+            elif self.move == (0, 8):
+                self.animation = animations['down']
+            elif self.move == (0, -8):
+                self.animation = animations['up']
             self.rect.x += self.move[0]
             self.rect.y += self.move[1]
             self.animation.update()
@@ -148,7 +156,19 @@ class Nps(pygame.sprite.Sprite):
             self.fl = True
         self.animation.update()
         self.image = self.animation.image
-        if self.move != (0, 0):
+        if self.rect.x == player.rect.x and self.rect.y > player.rect.y:
+            print(4)
+            self.up_attack((0, -1))
+        elif self.rect.x == player.rect.x and self.rect.y < player.rect.y:
+            print(3)
+            self.down_attack((0, 1))
+        elif self.rect.y == player.rect.y and self.rect.x > player.rect.x:
+            print(2)
+            self.left_attack((-1, 0))
+        elif self.rect.y == player.rect.y and self.rect.x < player.rect.x:
+            print(1)
+            self.right_attack((1, 0))
+        elif self.move != (0, 0):
             if self.move == (8, 0):
                 self.animation = animations_nps['right']
             elif self.move == (-8, 0):
@@ -161,24 +181,12 @@ class Nps(pygame.sprite.Sprite):
             self.rect.y += self.move[1]
             self.animation.update()
             self.image = self.animation.image
-        if self.move == (0, 0) and self.animation.die():
+        elif self.move == (0, 0) and self.animation.die():
             self.rect.x += self.ind_x
             self.rect.y += self.ind_y
             self.ind_x, self.ind_y = 0, 0
             player.animation = animations_nps['stay']
             self.image = self.animation.image
-        if self.rect.x == player.rect.x and self.rect.y > player.rect.y:
-            print(4)
-            self.up_attack((0, -1))
-        if self.rect.x == player.rect.x and self.rect.y < player.rect.y:
-            print(3)
-            self.down_attack((0, 1))
-        if self.rect.y == player.rect.y and self.rect.x > player.rect.x:
-            print(2)
-            self.left_attack((-1, 0))
-        if self.rect.y == player.rect.y and self.rect.x < player.rect.x:
-            print(1)
-            self.right_attack((1, 0))
 
     def right_attack(self, direction):
         if self.fl:
@@ -334,25 +342,21 @@ while running:
                 if event.mod == 64:
                     player.left_attack((-1, 0))
                 elif player.animation.die():
-                    player.animation = animations['left']
                     player.move = (-5, 0)
             if event.key == pygame.K_RIGHT:
                 if event.mod == 64:
                     player.right_attack((1, 0))
                 elif player.animation.die():
-                    player.animation = animations['right']
                     player.move = (5, 0)
             if event.key == pygame.K_UP:
                 if event.mod == 64:
                     player.up_attack((0, -1))
                 elif player.animation.die():
-                    player.animation = animations['up']
                     player.move = (0, -5)
             if event.key == pygame.K_DOWN:
                 if event.mod == 64:
                     player.down_attack((0, 1))
                 elif player.animation.die():
-                    player.animation = animations['down']
                     player.move = (0, 5)
         if event.type == pygame.KEYUP:
             player.move = (0, 0)
