@@ -114,13 +114,13 @@ class Character(pygame.sprite.Sprite):
         self.animation.update()
         self.image = self.animation.image
         if self.move != (0, 0):
-            if self.move == (8, 0):
+            if self.move == (5, 0):
                 self.animation = animations['right']
-            elif self.move == (-8, 0):
+            elif self.move == (-5, 0):
                 self.animation = animations['left']
-            elif self.move == (0, 8):
+            elif self.move == (0, 5):
                 self.animation = animations['down']
-            elif self.move == (0, -8):
+            elif self.move == (0, -5):
                 self.animation = animations['up']
             self.rect.x += self.move[0]
             self.rect.y += self.move[1]
@@ -169,13 +169,13 @@ class Nps(pygame.sprite.Sprite):
             print(1)
             self.right_attack((1, 0))
         elif self.move != (0, 0):
-            if self.move == (8, 0):
+            if self.move == (4, 0):
                 self.animation = animations_nps['right']
-            elif self.move == (-8, 0):
+            elif self.move == (-4, 0):
                 self.animation = animations_nps['left']
-            elif self.move == (0, 8):
+            elif self.move == (0, 4):
                 self.animation = animations_nps['down']
-            elif self.move == (0, -8):
+            elif self.move == (0, -4):
                 self.animation = animations_nps['up']
             self.rect.x += self.move[0]
             self.rect.y += self.move[1]
