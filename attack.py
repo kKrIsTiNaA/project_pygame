@@ -17,11 +17,9 @@ pygame.time.set_timer(CAN_ATTACK, 2000)
 pygame.time.set_timer(MOVE, 5000)
 pygame.mouse.set_visible(False)
 win = mixer.Sound('data/win.ogg')
-life_lost = mixer.Sound('data/life_lost.ogg')
 over = mixer.Sound('data/die.ogg')
 get = mixer.Sound('data/get.ogg')
 intro = mixer.Sound('data/fantasy_intro.ogg')
-laugh = mixer.Sound('data/death_laugh.ogg')
 click = mixer.Sound('data/click.ogg')
 attack = mixer.Sound('data/attack.ogg')
 
@@ -123,7 +121,6 @@ def game_over():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     click.play()
-                    main()
                     return
 
 
@@ -380,8 +377,7 @@ def level_generate(level):
                     Tile(TILE_IMAGES3['s'], x, y, True)
                     return_level[-1].append(0)
                     count += 1
-                    Boss(x, y)
-    print(str(count), 'count')
+                    Nps(x, y, boss=True)
     return new_player, x, y, return_level
 
 
@@ -481,9 +477,12 @@ class Character(pygame.sprite.Sprite):
 
 
 class Nps(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__((nps_group, all_sprites))
-        self.hp = 3
+    def __init__(self, pos_x, pos_y, boss=False):
+        super().__init__((nps_group, all_sprites, character_group))
+        if not boss:
+            self.hp = 3
+        else:
+            self.hp = 20
         self.x = pos_x
         self.y = pos_y
         self.ind_x = 0
@@ -574,14 +573,6 @@ class Nps(pygame.sprite.Sprite):
             self.image = self.animation.image
             Shell(self.rect.x + 10, self.rect.y + 15, 'fireball', direction, nps_group)
             self.fl = False
-
-
-class Boss(Nps):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(pos_x, pos_y)
-        self.hp = 20
-        Nps((self.rect.x // tile_width) + 1, self.rect.y // tile_height)
-        Nps((self.rect.x // tile_width) - 1, self.rect.y // tile_height)
 
 
 class Shell(pygame.sprite.Sprite):
@@ -705,11 +696,13 @@ clock = pygame.time.Clock()
 key = None
 count = None
 flag = True
+exit = 0
 
 
 def show_level1():
-    global all_sprites, nps_groupm, character_group, player_group, \
+    global all_sprites, nps_groupm, character_group, player_group, exit, \
         hearts, player_image, tiles_group, player, clock, key, count, flag
+    exit = 0
     count = 0
     key_group = pygame.sprite.Group()
     player, level_x, level_y, level = level_generate(load_level('level1.txt'))
@@ -720,6 +713,7 @@ def show_level1():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                exit = 1
                 running = False
             if event.type == CAN_ATTACK:
                 character_group.update('flag')
@@ -761,19 +755,18 @@ def show_level1():
                     if (player.rect.x // 50 == 22 and
                             player.rect.y // 50 == 18 and
                             key in key_group):
-                        camera = None
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
-                return -1
+                exit = 2
+                return
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        for sprite in nps_group:
-            screen.blit(sprite.image, camera.apply(sprite))
+        nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
         for i in range(player.hp):
@@ -788,7 +781,7 @@ def show_level1():
 
 def show_level2():
     global all_sprites, nps_group, character_group, player_group, \
-        hearts, player_image, tiles_group, player, clock, count
+        hearts, player_image, tiles_group, player, clock, count, exit
     for sprite in all_sprites:
         sprite.kill()
     screen.fill(pygame.Color('white'))
@@ -806,6 +799,7 @@ def show_level2():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                exit = 1
                 running = False
             if event.type == CAN_ATTACK:
                 character_group.update('flag')
@@ -839,14 +833,13 @@ def show_level2():
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
-                return -1
+                exit = 2
+                return
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        for sprite in nps_group:
-            screen.blit(sprite.image, camera.apply(sprite))
         nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
@@ -861,7 +854,8 @@ def show_level2():
 
 def show_level3():
     global all_sprites, nps_group, character_group, player_group, \
-        hearts, player_image, tiles_group, player, clock, count
+        hearts, player_image, tiles_group, player, clock, count, exit
+    print(nps_group)
     count = 0
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
@@ -870,6 +864,7 @@ def show_level3():
     character_group = pygame.sprite.Group()
     screen.fill(pygame.Color('white'))
     player, level_x, level_y, level = level_generate(load_level('level3.txt'))
+    print(nps_group)
     total_w = level_x * tile_width
     total_h = level_y * tile_width
     camera = Camera(camera_func, total_w, total_h)
@@ -877,6 +872,7 @@ def show_level3():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                exit = 1
                 running = False
             if event.type == CAN_ATTACK:
                 character_group.update('flag')
@@ -909,14 +905,14 @@ def show_level3():
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
-                return -1
+                exit = 2
+                return
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        for sprite in nps_group:
-            screen.blit(sprite.image, camera.apply(sprite))
+        nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
         for i in range(player.hp):
@@ -927,12 +923,35 @@ def show_level3():
         clock.tick(8)
         pygame.display.flip()
 
-
 def main():
     start_screen()
     show_level1()
+    if exit == 1:
+        return
+    elif exit == 2:
+        game_over()
+        for sprite in all_sprites:
+            sprite.kill()
+        player.kill()
+        main()
     show_level2()
+    if exit == 1:
+        return
+    elif exit == 2:
+        game_over()
+        for sprite in all_sprites:
+            sprite.kill()
+        player.kill()
+        main()
     show_level3()
+    if exit == 1:
+        return
+    elif exit == 2:
+        game_over()
+        for sprite in all_sprites:
+            sprite.kill()
+        player.kill()
+        main()
     win_screen()
 
 
