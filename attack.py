@@ -93,9 +93,8 @@ def terminate():
 
 def game_over():
     over.play()
-    screen3 = pygame.display.set_mode((750, 550))
     image3 = load_image('fon2.jpg')
-    screen3.blit(image3, (0, 0))
+    screen.blit(image3, (0, 0))
     text3 = ['GAME OVER',
              "Чтобы продолжить, нажмите 'Пробел'"]
     text_coord = 50
@@ -751,7 +750,7 @@ def show_level1():
                         key.add(key_group)
                     if (player.rect.x // 50 == 22 and
                             player.rect.y // 50 == 18 and
-                            key in key_group):
+                            key in key_group and count == 0):
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
@@ -827,7 +826,8 @@ def show_level2():
                     elif player.animation.die():
                         player.move = (0, 5)
                 if event.key == pygame.K_RETURN:
-                    if (player.rect.x // 50 == 19 and player.rect.y // 50 == 5):
+                    if (player.rect.x // 50 == 19 and player.rect.y // 50 == 5 and
+                        count == 0):
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
@@ -935,25 +935,34 @@ def main():
             sprite.kill()
         player.kill()
         main()
-    show_level2()
-    if exit == 1:
+    if exit == 0:
+        show_level2()
+        if exit == 1:
+            return
+        elif exit == 2:
+            game_over()
+            for sprite in all_sprites:
+                sprite.kill()
+            player.kill()
+            main()
+        if exit == 0:
+            show_level3()
+            if exit == 1:
+                return
+            elif exit == 2:
+                game_over()
+                for sprite in all_sprites:
+                    sprite.kill()
+                player.kill()
+                main()
+            if exit == 0:
+                win_screen()
+            else:
+                return
+        else:
+            return
+    else:
         return
-    elif exit == 2:
-        game_over()
-        for sprite in all_sprites:
-            sprite.kill()
-        player.kill()
-        main()
-    show_level3()
-    if exit == 1:
-        return
-    elif exit == 2:
-        game_over()
-        for sprite in all_sprites:
-            sprite.kill()
-        player.kill()
-        main()
-    win_screen()
 
 
 main()
