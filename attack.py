@@ -319,8 +319,6 @@ def level_generate(level):
         for y in range(len(level)):
             return_level.append([])
             for x in range(len(level[y])):
-                if level[y][x] == '2':
-                    print(x, y)
                 if level[y][x] == '@':
                     Tile(TILE_IMAGES['s'], x, y, True)
                     return_level[-1].append(0)
@@ -599,7 +597,6 @@ class Shell(pygame.sprite.Sprite):
         for i in character_group:
             if self.rect.colliderect(i) and i not in self.no_targ:
                 i.hp -= 1
-                print(i.hp)
                 self.kill()
 
 
@@ -765,8 +762,9 @@ def show_level1():
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
+        for sprite in nps_group:
+            screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
         for i in range(player.hp):
@@ -786,6 +784,7 @@ def show_level2():
         sprite.kill()
     screen.fill(pygame.Color('white'))
     count = 0
+    exit = 0
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     nps_group = pygame.sprite.Group()
@@ -839,8 +838,9 @@ def show_level2():
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
+        for sprite in nps_group:
+            screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
         for i in range(player.hp):
@@ -855,8 +855,8 @@ def show_level2():
 def show_level3():
     global all_sprites, nps_group, character_group, player_group, \
         hearts, player_image, tiles_group, player, clock, count, exit
-    print(nps_group)
     count = 0
+    exit = 0
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     nps_group = pygame.sprite.Group()
@@ -864,7 +864,6 @@ def show_level3():
     character_group = pygame.sprite.Group()
     screen.fill(pygame.Color('white'))
     player, level_x, level_y, level = level_generate(load_level('level3.txt'))
-    print(nps_group)
     total_w = level_x * tile_width
     total_h = level_y * tile_width
     camera = Camera(camera_func, total_w, total_h)
@@ -911,8 +910,9 @@ def show_level3():
         camera.update(player)
         for sprite in all_sprites:
             screen.blit(sprite.image, camera.apply(sprite))
+        for sprite in nps_group:
+            screen.blit(sprite.image, camera.apply(sprite))
         screen.blit(player.image, camera.apply(player))
-        nps_group.draw(screen)
         hearts = pygame.sprite.Group()
         x = 10
         for i in range(player.hp):
@@ -922,6 +922,7 @@ def show_level3():
         hearts.draw(screen)
         clock.tick(8)
         pygame.display.flip()
+
 
 def main():
     start_screen()
