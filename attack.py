@@ -289,7 +289,6 @@ class Heart(pygame.sprite.Sprite):
 
 class Cursor(pygame.sprite.Sprite):
     def __init__(self):
-        global all_sprites
         super().__init__(all_sprites)
         self.image = load_image('sword.png', -1)
         self.rect = self.image.get_rect()
@@ -312,8 +311,8 @@ def load_level(filename):
 
 
 def level_generate(level):
-    new_player, x, y, return_level = None, None, None, []
     global count
+    new_player, x, y, return_level = None, None, None, []
     if '~' in level[1]:
         for y in range(len(level)):
             return_level.append([])
@@ -380,20 +379,15 @@ def level_generate(level):
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_image, pos_x, pos_y, can_move):
-        global tiles_group, all_sprites
         super().__init__(tiles_group, all_sprites)
         self.image = tile_image
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.move = can_move
-
-    def can_move(self):
-        if self.move:
-            return True
 
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        global player_group, all_sprites
         super().__init__(player_group, character_group, all_sprites)
         self.hp = 10
         self.x = pos_x
@@ -404,6 +398,7 @@ class Character(pygame.sprite.Sprite):
         self.move = (0, 0)
         self.animation = animations['stay']
         self.image = self.animation.image
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect().move(pos_x * tile_width, pos_y * tile_height)
 
     def right_attack(self, direction):
@@ -471,6 +466,7 @@ class Character(pygame.sprite.Sprite):
             self.ind_x, self.ind_y = 0, 0
             player.animation = animations['stay']
             self.image = self.animation.image
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class Nps(pygame.sprite.Sprite):
@@ -722,21 +718,33 @@ def show_level1():
                         player.left_attack((-1, 0))
                     elif player.animation.die():
                         player.move = (-5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (5, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
                         player.move = (5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (-5, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
                         player.move = (0, -5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, 5)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
                         player.move = (0, 5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, -5)
                 if event.key == pygame.K_RETURN:
                     if (player.rect.x // 50 == 7 and
                             player.rect.y // 50 == 17):
@@ -772,7 +780,7 @@ def show_level1():
             x += 30
         hearts.draw(screen)
         key_group.draw(screen)
-        clock.tick(8)
+        clock.tick(10)
         pygame.display.flip()
 
 
@@ -810,24 +818,36 @@ def show_level2():
                         player.left_attack((-1, 0))
                     elif player.animation.die():
                         player.move = (-5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (5, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
                         player.move = (5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (-5, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
                         player.move = (0, -5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, 5)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
                         player.move = (0, 5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, -5)
                 if event.key == pygame.K_RETURN:
                     if (player.rect.x // 50 == 19 and player.rect.y // 50 == 5 and
-                        count == 0):
+                            count == 0):
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
@@ -848,7 +868,7 @@ def show_level2():
             heart.add(hearts)
             x += 30
         hearts.draw(screen)
-        clock.tick(8)
+        clock.tick(10)
         pygame.display.flip()
 
 
@@ -884,21 +904,33 @@ def show_level3():
                         player.left_attack((-1, 0))
                     elif player.animation.die():
                         player.move = (-5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (5, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
                         player.move = (5, 0)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (-5, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
                         player.move = (0, -5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, 5)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
                         player.move = (0, 5)
+                        for tile in tiles_group:
+                            if pygame.sprite.collide_mask(player, tile) and not tile.move:
+                                player.move = (0, -5)
                 if count == 0:
                     return
             if event.type == pygame.KEYUP:
@@ -920,7 +952,7 @@ def show_level3():
             heart.add(hearts)
             x += 30
         hearts.draw(screen)
-        clock.tick(8)
+        clock.tick(10)
         pygame.display.flip()
 
 
