@@ -785,7 +785,6 @@ def show_level1():
             if player.hp == 0:
                 ex = 2
                 return
-        print(count)
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
@@ -896,7 +895,6 @@ def show_level2():
             if player.hp == 0:
                 ex = 2
                 return
-        print(count)
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
