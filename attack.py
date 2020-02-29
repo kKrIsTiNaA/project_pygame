@@ -131,8 +131,8 @@ def show_rules():
              "уничтожить помощника Сатаны, который причиняет",
              "вред мирным жителям. Вам нужно пройти пройти",
              "2 уровня, а потом сразиться с главным злодеем.",
-             "Подсказка: вам необходимо убить всех монстров на",
-             "каждом уровне. Для передвижения используйте",
+             "Нужно убить хотя бы одного монстра на уровне.",
+             "Для передвижения используйте",
              "клавиши-стрелки, а для атаки - стрелки + Ctrl",
              "Подобрать предмет или зайти в дом можно",
              "при помощи клавиши Enter. Удачи!",
@@ -274,7 +274,6 @@ def win_screen():
                 if event.key == pygame.K_SPACE:
                     win.stop()
                     click.play()
-                    main()
                     return
 
 
@@ -713,63 +712,59 @@ def show_level1():
                 for i in nps_group:
                     num = random.choice(nps_move)
                     i.move = num
-                    if num[0] == 4:
-                        i.move = (-4, 0)
-                    elif num[0] == -4:
-                        i.move = (4, 0)
+                    if num[0] == -4:
+                        if i.rect.x >= 4:
+                            i.move = (-4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[0] == 4:
+                        if (i.rect.x + i.rect.width) <= (total_w - 4):
+                            i.move = (4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[1] == -4:
+                        if i.rect.y >= 4:
+                            i.move = (0, -4)
+                        else:
+                            i.move = (0, 0)
                     elif num[1] == 4:
-                        i.move = (0, -4)
-                    else:
-                        i.move = (0, 4)
+                        if (i.rect.y + i.rect.height) <= (total_h - 4):
+                            i.move = (0, 4)
+                        else:
+                            i.move = (0, 0)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     if event.mod == 64:
                         player.left_attack((-1, 0))
                     elif player.animation.die():
-                        player.move = (-5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (player.rect.x + player.rect.width - tile.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (5, 0)
-                                player.move = (0, 0)
+                        if player.rect.x >= 5:
+                            player.move = (-5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
-                        player.move = (5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (tile.rect.x + tile.rect.width - player.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (-5, 0)
-                                player.move = (0, 0)
+                        if (player.rect.x + player.rect.width) <= (total_w - 5):
+                            player.move = (5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
-                        player.move = (0, -5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    20 >= (tile.rect.y + tile.rect.height - player.rect.y) >= 0 and
-                                    (player.rect.x + player.rect.width) >= tile.rect.x and
-                                    player.rect.x <= (tile.rect.x + tile.rect.width)):
-                                player.move = (0, 5)
-                                player.move = (0, 0)
+                        if player.rect.y >= 5:
+                            player.move = (0, -5)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
-                        player.move = (0, 5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (player.rect.y + player.rect.height - tile.rect.y) >= 0 and
-                                    (player.rect.x + player.rect.width) >= tile.rect.x and
-                                    player.rect.x <= (tile.rect.x + tile.rect.width)):
-                                player.move = (0, -5)
-                                player.move = (0, 0)
+                        if (player.rect.y + player.rect.height) <= (total_h - 5):
+                            player.move = (0, 5)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_RETURN:
                     if (player.rect.x // 50 == 7 and
                             player.rect.y // 50 == 17):
@@ -783,13 +778,14 @@ def show_level1():
                         key.add(key_group)
                     if (player.rect.x // 50 == 22 and
                             player.rect.y // 50 == 18 and
-                            key in key_group and count == 0):
+                            key in key_group and count <= 6):
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
                 ex = 2
                 return
+        print(count)
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
@@ -805,7 +801,7 @@ def show_level1():
             x += 30
         hearts.draw(screen)
         key_group.draw(screen)
-        clock.tick(10)
+        clock.tick(15)
         pygame.display.flip()
 
 
@@ -836,65 +832,71 @@ def show_level2():
                 character_group.update('flag')
             if event.type == MOVE:
                 for i in nps_group:
-                    i.move = random.choice(nps_move)
+                    num = random.choice(nps_move)
+                    i.move = num
+                    if num[0] == -4:
+                        if i.rect.x >= 4:
+                            i.move = (-4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[0] == 4:
+                        if (i.rect.x + i.rect.width) <= (total_w - 4):
+                            i.move = (4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[1] == -4:
+                        if i.rect.y >= 4:
+                            i.move = (0, -4)
+                        else:
+                            i.move = (0, 0)
+                    elif num[1] == 4:
+                        if (i.rect.y + i.rect.height) <= (total_h - 4):
+                            i.move = (0, 4)
+                        else:
+                            i.move = (0, 0)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     if event.mod == 64:
                         player.left_attack((-1, 0))
                     elif player.animation.die():
-                        player.move = (-5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (player.rect.x + player.rect.width - tile.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (5, 0)
-                                player.move = (0, 0)
+                        if player.rect.x >= 5:
+                            player.move = (-5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
-                        player.move = (5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (tile.rect.x + tile.rect.width - player.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (-5, 0)
-                                player.move = (0, 0)
+                        if (player.rect.x + player.rect.width) <= (total_w - 5):
+                            player.move = (5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
-                        player.move = (0, -5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    20 >= (tile.rect.y + tile.rect.height - player.rect.y) >= 0 and
-                                    (player.rect.x + player.rect.width) >= tile.rect.x and
-                                    player.rect.x <= (tile.rect.x + tile.rect.width)):
-                                player.move = (0, 5)
-                                player.move = (0, 0)
+                        if player.rect.y >= 5:
+                            player.move = (0, -5)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
-                        player.move = (0, 5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= player.rect.y + player.rect.height - tile.rect.y >= 0 and
-                                    player.rect.x + player.rect.width >= tile.rect.x and
-                                    player.rect.x <= tile.rect.x + tile.rect.width):
-                                player.move = (0, -5)
-                                player.move = (0, 0)
+                        if (player.rect.y + player.rect.height) <= (total_h - 5):
+                            player.move = (0, 5)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_RETURN:
                     if (player.rect.x // 50 == 19 and player.rect.y // 50 == 5 and
-                            count == 0):
+                            count <= 3):
                         return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
                 ex = 2
                 return
+        print(count)
         all_sprites.update()
         camera.update(player)
         for sprite in all_sprites:
@@ -909,7 +911,7 @@ def show_level2():
             heart.add(hearts)
             x += 30
         hearts.draw(screen)
-        clock.tick(10)
+        clock.tick(15)
         pygame.display.flip()
 
 
@@ -938,58 +940,63 @@ def show_level3():
                 character_group.update('flag')
             if event.type == MOVE:
                 for i in nps_group:
-                    i.move = random.choice(nps_move)
+                    num = random.choice(nps_move)
+                    i.move = num
+                    if num[0] == -4:
+                        if i.rect.x >= 4:
+                            i.move = (-4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[0] == 4:
+                        if (i.rect.x + i.rect.width) <= (total_w - 4):
+                            i.move = (4, 0)
+                        else:
+                            i.move = (0, 0)
+                    elif num[1] == -4:
+                        if i.rect.y >= 4:
+                            i.move = (0, -4)
+                        else:
+                            i.move = (0, 0)
+                    elif num[1] == 4:
+                        if (i.rect.y + i.rect.height) <= (total_h - 4):
+                            i.move = (0, 4)
+                        else:
+                            i.move = (0, 0)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     if event.mod == 64:
                         player.left_attack((-1, 0))
                     elif player.animation.die():
-                        player.move = (-5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (player.rect.x + player.rect.width - tile.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (5, 0)
-                                player.move = (0, 0)
+                        if player.rect.x >= 5:
+                            player.move = (-5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_RIGHT:
                     if event.mod == 64:
                         player.right_attack((1, 0))
                     elif player.animation.die():
-                        player.move = (5, 0)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (tile.rect.x + tile.rect.width - player.rect.x) >= 0 and
-                                    (player.rect.y + player.rect.height) >= tile.rect.y and
-                                    player.rect.y <= (tile.rect.y + tile.rect.height)):
-                                player.move = (-5, 0)
-                                player.move = (0, 0)
+                        if (player.rect.x + player.rect.width) <= (total_w - 5):
+                            player.move = (5, 0)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_UP:
                     if event.mod == 64:
                         player.up_attack((0, -1))
                     elif player.animation.die():
-                        player.move = (0, -5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    20 >= (tile.rect.y + tile.rect.height - player.rect.y) >= 0 and
-                                    (player.rect.x + player.rect.width) >= tile.rect.x and
-                                    player.rect.x <= (tile.rect.x + tile.rect.width)):
-                                player.move = (0, 5)
-                                player.move = (0, 0)
+                        if player.rect.y >= 5:
+                            player.move = (0, -5)
+                        else:
+                            player.move = (0, 0)
                 if event.key == pygame.K_DOWN:
                     if event.mod == 64:
                         player.down_attack((0, 1))
                     elif player.animation.die():
-                        player.move = (0, 5)
-                        for tile in pygame.sprite.spritecollide(player, tiles_group, False):
-                            if (not tile.move and
-                                    5 >= (player.rect.y + player.rect.height - tile.rect.y) >= 0 and
-                                    (player.rect.x + player.rect.width) >= tile.rect.x and
-                                    player.rect.x <= (tile.rect.x + tile.rect.width)):
-                                player.move = (0, -5)
-                                player.move = (0, 0)
-                if count == 0:
-                    return
+                        if (player.rect.y + player.rect.height) <= (total_h - 5):
+                            player.move = (0, 5)
+                        else:
+                            player.move = (0, 0)
+            if count == 0:
+                return
             if event.type == pygame.KEYUP:
                 player.move = (0, 0)
             if player.hp == 0:
@@ -1046,6 +1053,10 @@ def main():
                 main()
             if ex == 0:
                 win_screen()
+                for sprite in all_sprites:
+                    sprite.kill()
+                player.kill()
+                main()
             else:
                 return
         else:
